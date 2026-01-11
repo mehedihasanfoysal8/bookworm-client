@@ -1,0 +1,50 @@
+export const registerUser = async (payload: {
+  name: string;
+  email: string;
+  password: string;
+}) => {
+  const res = await fetch("http://localhost:5000/api/v1/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    if (data?.errorSources?.length) {
+      throw new Error(data.errorSources[0].message);
+    }
+
+    throw new Error(data.message || "Registration failed");
+  }
+
+  return data.data;
+};
+
+export const loginUser = async (payload: {
+  email: string;
+  password: string;
+}) => {
+  const res = await fetch("http://localhost:5000/api/v1/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    if (data?.errorSources?.length) {
+      throw new Error(data.errorSources[0].message);
+    }
+
+    throw new Error(data.message || "Something went wrong");
+  }
+
+  return data.data.accessToken;
+};
