@@ -33,6 +33,7 @@ export const loginUser = async (payload: {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -42,9 +43,8 @@ export const loginUser = async (payload: {
     if (data?.errorSources?.length) {
       throw new Error(data.errorSources[0].message);
     }
-
-    throw new Error(data.message || "Something went wrong");
+    throw new Error(data.message || "Login failed");
   }
 
-  return data.data.accessToken;
+  return true; // just success signal
 };
