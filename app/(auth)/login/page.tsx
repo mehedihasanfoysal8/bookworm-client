@@ -1,57 +1,85 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import { loginUser } from "@/services/auth.service";
-import { useAuth } from "@/context/AuthContext";
+import { LoginFormData, loginSchema } from "@/schema/auth.schema";
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const token = await loginUser({ email, password });
-      login(token);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message);
+      setServerError(null);
+      await loginUser(data);
+      router.push("/");
+    } catch (err) {
+      if (err instanceof Error) {
+        setServerError(err.message);
+      } else {
+        setServerError("Login failed");
+      }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-6 rounded shadow w-80 space-y-4"
       >
         <h1 className="text-xl font-bold text-center">Login</h1>
 
-        <input
-          type="email"
-          className="w-full border p-2 rounded"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* Email */}
+        <div>
+          <input
+            type="email"
+            {...register("email")}
+            placeholder="Email"
+            className="w-full border p-2 rounded"
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
+          )}
+        </div>
 
-        <input
-          className="w-full border p-2 rounded"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {/* Password */}
+        <div>
+          <input
+            type="password"
+            {...register("password")}
+            placeholder="Password"
+            className="w-full border p-2 rounded"
+          />
+          {errors.password && (
+            <p className="text-red-500 text-sm">{errors.password.message}</p>
+          )}
+        </div>
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded">
-          Login
+        {/* Server error */}
+        {serverError && (
+          <p className="text-red-500 text-sm text-center">{serverError}</p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isSubmitting ? "Logging in..." : "Login"}
         </button>
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       </form>
     </div>
   );

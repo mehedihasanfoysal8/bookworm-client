@@ -8,6 +8,7 @@ export const registerUser = async (payload: {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -21,6 +22,19 @@ export const registerUser = async (payload: {
     throw new Error(data.message || "Registration failed");
   }
 
+  return data.data;
+};
+
+export const getMe = async () => {
+  const res = await fetch("http://localhost:5000/api/v1/auth/me", {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const data = await res.json();
   return data.data;
 };
 

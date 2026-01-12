@@ -3,33 +3,35 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
-import { loginUser } from "@/services/auth.service";
-import { useAuth } from "@/context/AuthContext";
-import { LoginFormData, loginSchema } from "@/schema/auth.schema";
+import { registerUser } from "@/services/auth.service";
+import { RegisterFormData, registerSchema } from "@/schema/auth.schema";
 
-export default function LoginPage() {
-  const { login } = useAuth();
+export default function RegisterPage() {
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       setServerError(null);
-      const token = await loginUser(data);
-      login(token);
+      await registerUser(data);
+
+      // register success → login page
+      router.push("/login");
     } catch (err) {
       if (err instanceof Error) {
         setServerError(err.message);
       } else {
-        setServerError("Login failed");
+        setServerError("Registration failed");
       }
     }
   };
@@ -40,7 +42,19 @@ export default function LoginPage() {
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-6 rounded shadow w-80 space-y-4"
       >
-        <h1 className="text-xl font-bold text-center">Login</h1>
+        <h1 className="text-xl font-bold text-center">Register</h1>
+
+        {/* Name */}
+        <div>
+          <input
+            {...register("name")}
+            placeholder="Full Name"
+            className="w-full border p-2 rounded"
+          />
+          {errors.name && (
+            <p className="text-red-500 text-sm">{errors.name.message}</p>
+          )}
+        </div>
 
         {/* Email */}
         <div>
@@ -68,7 +82,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Server Error */}
         {serverError && (
           <p className="text-red-500 text-sm text-center">{serverError}</p>
         )}
@@ -76,9 +89,9 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-green-600 text-white py-2 rounded"
         >
-          {isSubmitting ? "Logging in..." : "Login"}
+          {isSubmitting ? "Creating account..." : "Register"}
         </button>
       </form>
     </div>

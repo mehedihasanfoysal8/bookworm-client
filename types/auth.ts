@@ -8,6 +8,6 @@ export type TUser = {
 
 export type TAuthContext = {
   user: TUser | null;
-  login: (token: string) => void;
   logout: () => void;
+  loading: boolean;
 };
