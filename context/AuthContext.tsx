@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TAuthContext, TUser } from "@/types/auth";
 import { getMe } from "@/services/auth.service";
+import { getMyProfile } from "@/services/user.service";
 
 const AuthContext = createContext<TAuthContext | null>(null);
 
@@ -32,8 +33,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/login");
   };
 
+  const refreshUser = async () => {
+    const me = await getMyProfile();
+    setUser(me);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, logout, loading }}>
+    <AuthContext.Provider value={{ user, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

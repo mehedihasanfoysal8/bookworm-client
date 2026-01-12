@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (!user) return null;
 
   if (loading) {
     return (
@@ -44,14 +47,7 @@ const Navbar = () => {
             </>
           )}
 
-          {user && (
-            <button
-              onClick={logout}
-              className="bg-red-500 text-white px-3 py-1 rounded"
-            >
-              Logout
-            </button>
-          )}
+          <ProfileDropdown />
         </div>
       </div>
     </nav>
