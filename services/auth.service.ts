@@ -1,64 +1,37 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ApiResponse } from "@/types/global.type";
+import { apiFetch } from "@/utils/apiFetch";
+
 export const registerUser = async (payload: {
   name: string;
   email: string;
   password: string;
 }) => {
-  const res = await fetch("http://localhost:5000/api/v1/auth/register", {
+  const res = await apiFetch<ApiResponse<null>>(`/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    if (data?.errorSources?.length) {
-      throw new Error(data.errorSources[0].message);
-    }
-
-    throw new Error(data.message || "Registration failed");
-  }
-
-  return data.data;
+  return res.data;
 };
 
 export const getMe = async () => {
-  const res = await fetch("http://localhost:5000/api/v1/auth/me", {
-    credentials: "include",
-  });
-
-  if (!res.ok) {
+  try {
+    const res = await apiFetch<ApiResponse<any>>(`/auth/me`);
+    return res.data;
+  } catch {
     return null;
   }
-
-  const data = await res.json();
-  return data.data;
 };
 
 export const loginUser = async (payload: {
   email: string;
   password: string;
 }) => {
-  const res = await fetch("http://localhost:5000/api/v1/auth/login", {
+  await apiFetch<ApiResponse<null>>(`/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    if (data?.errorSources?.length) {
-      throw new Error(data.errorSources[0].message);
-    }
-    throw new Error(data.message || "Login failed");
-  }
-
-  return true; // just success signal
+  return true;
 };

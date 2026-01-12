@@ -1,59 +1,41 @@
-export const getMyProfile = async () => {
-  const res = await fetch("http://localhost:5000/api/v1/users/me", {
-    credentials: "include",
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.data;
+import { TUser, TUserRole } from "@/types/auth";
+import { ApiResponse } from "@/types/global.type";
+import { apiFetch } from "@/utils/apiFetch";
+
+export const getMyProfile = async (): Promise<TUser | null> => {
+  try {
+    const res = await apiFetch<ApiResponse<TUser>>(`/users/me`);
+    return res.data;
+  } catch {
+    return null;
+  }
 };
 
 export const updateMyProfile = async (payload: {
   name: string;
   photo?: string;
-}) => {
-  const res = await fetch("http://localhost:5000/api/v1/users/me", {
+}): Promise<TUser> => {
+  const res = await apiFetch<ApiResponse<TUser>>(`/users/me`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  return data.data;
+  return res.data;
 };
-
-import { TUser, TUserRole } from "@/types/user";
-
-const API_URL = "http://localhost:5000/api/v1";
 
 export const getAllUsers = async (): Promise<TUser[]> => {
-  const res = await fetch(`${API_URL}/users`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch users");
-  }
-
-  const data = await res.json();
-  return data.data;
+  const res = await apiFetch<ApiResponse<TUser[]>>(`/users`);
+  return res.data;
 };
 
-export const updateUserRole = async (userId: string, role: TUserRole) => {
-  const res = await fetch(`${API_URL}/users/${userId}/role`, {
+export const updateUserRole = async (
+  userId: string,
+  role: TUserRole
+): Promise<TUser> => {
+  const res = await apiFetch<ApiResponse<TUser>>(`/users/${userId}/role`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify({ role }),
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to update role");
-  }
-
-  return res.json();
+  return res.data;
 };
